@@ -20,12 +20,13 @@
     <string name="action_save">Save</string>
     <string name="action_mark_all_read">Mark all as read</string>
 
+    <string name="filter_edition">Today's edition</string>
     <string name="filter_all">All</string>
     <string name="filter_unread">Unread</string>
     <string name="filter_bookmarked">Saved</string>
 
     <string name="search_hint">Search headlines</string>
-    <string name="empty_timeline">No articles yet. Pull down to refresh.</string>
+    <string name="empty_timeline">No edition yet. Pull down to assemble one.</string>
     <string name="empty_search">Nothing matches your search.</string>
     <string name="empty_feeds">No sources yet.</string>
 
@@ -41,9 +42,12 @@
     <string name="theme_system">Follow system</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="settings_sync">Background refresh</string>
-    <string name="settings_interval">Refresh interval</string>
-    <string name="settings_notifications">Notify about new articles</string>
+    <string name="settings_edition">Edition</string>
+    <string name="settings_edition_hour">Assembled at</string>
+    <string name="settings_edition_size">Articles per edition</string>
+    <string name="settings_at_hour">%1$d:00</string>
+    <string name="settings_articles">%1$d articles</string>
+    <string name="settings_notifications">Notify when an edition is ready</string>
     <string name="settings_volume">Volume</string>
     <string name="settings_per_source">Articles per source</string>
     <string name="per_source_count">%1$d newest</string>
@@ -51,12 +55,10 @@
     <string name="settings_storage">Storage</string>
     <string name="settings_retention">Keep articles for</string>
     <string name="settings_days">%1$d days</string>
-    <string name="settings_minutes">%1$d min</string>
-    <string name="settings_hours">%1$d h</string>
 
-    <string name="notification_channel_name">New articles</string>
-    <string name="notification_channel_description">Notifications about newly downloaded articles.</string>
-    <string name="notification_title">%1$d new articles</string>
+    <string name="notification_channel_name">Daily edition</string>
+    <string name="notification_channel_description">One notification a day when the edition is ready.</string>
+    <string name="notification_title">Edition ready — %1$d articles</string>
 
     <string name="refresh_failed">Refresh failed: %1$s</string>
     <string name="refresh_partial">%1$d sources failed: %2$s</string>

@@ -62,12 +62,18 @@ fun SettingsScreen(
             )
 
             HorizontalDivider()
-            SectionHeader(stringResource(R.string.settings_sync))
+            SectionHeader(stringResource(R.string.settings_edition))
             ChoiceRow(
-                label = stringResource(R.string.settings_interval),
-                value = intervalLabel(settings.refreshIntervalMinutes),
-                options = SettingsStore.INTERVAL_CHOICES.map { it to intervalLabel(it) },
-                onSelect = viewModel::setRefreshInterval,
+                label = stringResource(R.string.settings_edition_hour),
+                value = hourLabel(settings.editionHour),
+                options = SettingsStore.EDITION_HOUR_CHOICES.map { it to hourLabel(it) },
+                onSelect = viewModel::setEditionHour,
+            )
+            ChoiceRow(
+                label = stringResource(R.string.settings_edition_size),
+                value = sizeLabel(settings.editionSize),
+                options = SettingsStore.EDITION_SIZE_CHOICES.map { it to sizeLabel(it) },
+                onSelect = viewModel::setEditionSize,
             )
             SwitchRow(
                 label = stringResource(R.string.settings_notifications),
@@ -113,11 +119,14 @@ private fun perSourceLabel(limit: Int): String =
     }
 
 @Composable
-private fun intervalLabel(minutes: Int): String =
-    if (minutes < 60) {
-        stringResource(R.string.settings_minutes, minutes)
+private fun hourLabel(hour: Int): String = stringResource(R.string.settings_at_hour, hour)
+
+@Composable
+private fun sizeLabel(size: Int): String =
+    if (size <= 0) {
+        stringResource(R.string.per_source_unlimited)
     } else {
-        stringResource(R.string.settings_hours, minutes / 60)
+        stringResource(R.string.settings_articles, size)
     }
 
 private fun themeLabel(mode: ThemeMode): Int = when (mode) {

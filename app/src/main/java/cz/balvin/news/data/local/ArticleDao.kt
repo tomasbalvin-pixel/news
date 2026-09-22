@@ -18,13 +18,18 @@ interface ArticleDao {
      * pass the current filters. The rank is counted with a correlated subquery
      * rather than a window function, which SQLite only gained in a version newer
      * than this app's minimum. Zero or less means no cap.
+     *
+     * [since] scopes the result to one edition by the time articles were fetched
+     * rather than published, so a source that backdates its items cannot slip
+     * them past the boundary. Zero lifts it.
      */
     @Query(
         """
         SELECT a.*, f.title AS feedTitle, f.category AS feedCategory
         FROM articles a
         JOIN feeds f ON f.id = a.feedId
-        WHERE (:onlyUnread = 0 OR a.isRead = 0)
+        WHERE (:since <= 0 OR a.fetchedAt >= :since)
+          AND (:onlyUnread = 0 OR a.isRead = 0)
           AND (:onlyBookmarked = 0 OR a.isBookmarked = 1)
           AND (:category IS NULL OR f.category = :category)
           AND (:feedId IS NULL OR a.feedId = :feedId)
@@ -38,6 +43,7 @@ interface ArticleDao {
                 OR (
                     SELECT COUNT(*) FROM articles n
                     WHERE n.feedId = a.feedId
+                      AND (:since <= 0 OR n.fetchedAt >= :since)
                       AND (
                             n.publishedAt > a.publishedAt
                             OR (n.publishedAt = a.publishedAt AND n.id > a.id)
@@ -61,6 +67,7 @@ interface ArticleDao {
         category: String?,
         feedId: Long?,
         query: String,
+        since: Long,
         perSourceLimit: Int,
         limit: Int,
     ): Flow<List<ArticleListItem>>

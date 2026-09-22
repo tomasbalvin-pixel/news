@@ -17,12 +17,13 @@
     <string name="action_save">Uložit</string>
     <string name="action_mark_all_read">Označit vše jako přečtené</string>
 
+    <string name="filter_edition">Dnešní vydání</string>
     <string name="filter_all">Vše</string>
     <string name="filter_unread">Nepřečtené</string>
     <string name="filter_bookmarked">Uložené</string>
 
     <string name="search_hint">Hledat ve zprávách</string>
-    <string name="empty_timeline">Zatím žádné články. Stáhněte dolů pro načtení.</string>
+    <string name="empty_timeline">Zatím žádné vydání. Stáhněte dolů a sestaví se.</string>
     <string name="empty_search">Hledání nic nenašlo.</string>
     <string name="empty_feeds">Zatím žádné zdroje.</string>
 
@@ -38,9 +39,12 @@
     <string name="theme_system">Podle systému</string>
     <string name="theme_light">Světlý</string>
     <string name="theme_dark">Tmavý</string>
-    <string name="settings_sync">Aktualizace na pozadí</string>
-    <string name="settings_interval">Interval aktualizace</string>
-    <string name="settings_notifications">Upozorňovat na nové články</string>
+    <string name="settings_edition">Vydání</string>
+    <string name="settings_edition_hour">Sestavit v</string>
+    <string name="settings_edition_size">Článků ve vydání</string>
+    <string name="settings_at_hour">%1$d:00</string>
+    <string name="settings_articles">%1$d článků</string>
+    <string name="settings_notifications">Upozornit, až bude vydání hotové</string>
     <string name="settings_volume">Objem</string>
     <string name="settings_per_source">Článků na zdroj</string>
     <string name="per_source_count">%1$d nejnovějších</string>
@@ -48,12 +52,10 @@
     <string name="settings_storage">Úložiště</string>
     <string name="settings_retention">Uchovávat články</string>
     <string name="settings_days">%1$d dní</string>
-    <string name="settings_minutes">%1$d min</string>
-    <string name="settings_hours">%1$d h</string>
 
-    <string name="notification_channel_name">Nové články</string>
-    <string name="notification_channel_description">Upozornění na nově stažené články.</string>
-    <string name="notification_title">%1$d nových článků</string>
+    <string name="notification_channel_name">Denní vydání</string>
+    <string name="notification_channel_description">Jedno upozornění denně, až je vydání hotové.</string>
+    <string name="notification_title">Vydání je hotové — %1$d článků</string>
 
     <string name="refresh_failed">Aktualizace selhala: %1$s</string>
     <string name="refresh_partial">%1$d zdrojů selhalo: %2$s</string>

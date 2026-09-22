@@ -31,7 +31,7 @@ object Notifier {
         NotificationManagerCompat.from(context).createNotificationChannel(channel)
     }
 
-    fun notifyNewArticles(context: Context, count: Int, headline: String?) {
+    fun notifyEditionReady(context: Context, count: Int, headline: String?) {
         if (count <= 0 || !canPost(context)) return
         ensureChannel(context)
 

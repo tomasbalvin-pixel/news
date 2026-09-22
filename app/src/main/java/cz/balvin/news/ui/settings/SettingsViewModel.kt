@@ -30,12 +30,16 @@ class SettingsViewModel(
         viewModelScope.launch { settingsStore.setTheme(mode) }
     }
 
-    /** Changing the interval also reschedules; the stored value alone changes nothing. */
-    fun setRefreshInterval(minutes: Int) {
+    /** Changing the hour also reschedules; the stored value alone changes nothing. */
+    fun setEditionHour(hour: Int) {
         viewModelScope.launch {
-            settingsStore.setRefreshInterval(minutes)
-            RefreshScheduler.schedule(application, minutes)
+            settingsStore.setEditionHour(hour)
+            RefreshScheduler.scheduleDailyEdition(application, hour)
         }
+    }
+
+    fun setEditionSize(size: Int) {
+        viewModelScope.launch { settingsStore.setEditionSize(size) }
     }
 
     fun setNotificationsEnabled(enabled: Boolean) {

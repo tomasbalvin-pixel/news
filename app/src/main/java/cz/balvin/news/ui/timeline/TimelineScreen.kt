@@ -64,6 +64,7 @@ fun TimelineScreen(
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val unreadCount by viewModel.unreadCount.collectAsStateWithLifecycle()
+    val editionOnly by viewModel.editionOnly.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
 
@@ -150,6 +151,8 @@ fun TimelineScreen(
         ) {
             Column(Modifier.fillMaxSize()) {
                 FilterRow(
+                    editionOnly = editionOnly,
+                    onEditionOnly = viewModel::setEditionOnly,
                     categories = categories,
                     selectedCategory = filter.category,
                     onlyUnread = filter.onlyUnread,
@@ -219,6 +222,8 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
 
 @Composable
 private fun FilterRow(
+    editionOnly: Boolean,
+    onEditionOnly: (Boolean) -> Unit,
     categories: List<String>,
     selectedCategory: String?,
     onlyUnread: Boolean,
@@ -237,8 +242,16 @@ private fun FilterRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilterChip(
-            selected = !onlyUnread && !onlyBookmarked && selectedCategory == null,
-            onClick = onClearAll,
+            selected = editionOnly,
+            onClick = { onEditionOnly(true) },
+            label = { Text(stringResource(R.string.filter_edition)) },
+        )
+        FilterChip(
+            selected = !editionOnly && !onlyUnread && !onlyBookmarked && selectedCategory == null,
+            onClick = {
+                onEditionOnly(false)
+                onClearAll()
+            },
             label = { Text(stringResource(R.string.filter_all)) },
         )
         FilterChip(

@@ -8,4 +8,8 @@ data class TimelineFilter(
     val query: String = "",
     /** At most this many articles per source; zero or less lifts the cap. */
     val perSourceLimit: Int = 0,
+    /** Only articles fetched at or after this instant; zero lifts the bound. */
+    val since: Long = 0,
+    /** How many articles the whole result may hold; zero or less means the default. */
+    val limit: Int = 0,
 )

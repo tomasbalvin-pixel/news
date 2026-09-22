@@ -6,6 +6,18 @@
 Větev se jmenuje `claude/android-messaging-app-atmauj`, což svádí k opaku;
 je to artefakt pojmenování při zakládání session, ne záměr. Neřiď se jím.
 
+## Jak je to myšlené
+
+Ne nekonečný proud, ale **denní vydání**. Zadavatel výslovně nechce sledovat
+zprávy průběžně a nechce jich mnoho. Přehled proto defaultně ukazuje jen to, co
+přiteklo od posledního sestavení (`Settings.currentEditionAt`, hranice se měří
+podle `fetchedAt`, ne `publishedAt`), shora omezené počtem a stropem na zdroj.
+Aktualizace běží jednou denně, notifikace je jedna na vydání. Filtr *Vše* nechá
+projít všechno — nic se nemaže, jen se necpe dopředu.
+
+Než přidáš cokoli, co zvyšuje objem nebo četnost upozornění, zvaž, že jde proti
+zadání.
+
 ## Instalace na zařízení
 
 **Buildy neposílej přes GitHub Release ani přes artefakty Actions.** Instaluj

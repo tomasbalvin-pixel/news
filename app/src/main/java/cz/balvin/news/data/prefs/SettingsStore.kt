@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -15,11 +16,16 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 data class Settings(
     val theme: ThemeMode = ThemeMode.SYSTEM,
-    val refreshIntervalMinutes: Int = 60,
+    /** Hour of day, local time, when the next edition is assembled. */
+    val editionHour: Int = 7,
+    /** Articles an edition may hold; zero lifts the cap. */
+    val editionSize: Int = 20,
+    /** Articles per source within an edition; zero lifts the cap. */
+    val perSourceLimit: Int = 5,
     val notificationsEnabled: Boolean = true,
     val retentionDays: Int = 30,
-    /** Articles shown per source in the timeline; zero lifts the cap. */
-    val perSourceLimit: Int = 5,
+    /** When the current edition was assembled; articles fetched since belong to it. */
+    val currentEditionAt: Long = 0,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -31,10 +37,12 @@ class SettingsStore(private val context: Context) {
             theme = prefs[KEY_THEME]?.let { stored ->
                 runCatching { ThemeMode.valueOf(stored) }.getOrNull()
             } ?: ThemeMode.SYSTEM,
-            refreshIntervalMinutes = prefs[KEY_INTERVAL] ?: 60,
+            editionHour = prefs[KEY_EDITION_HOUR] ?: 7,
+            editionSize = prefs[KEY_EDITION_SIZE] ?: 20,
+            perSourceLimit = prefs[KEY_PER_SOURCE] ?: 5,
             notificationsEnabled = prefs[KEY_NOTIFICATIONS] ?: true,
             retentionDays = prefs[KEY_RETENTION] ?: 30,
-            perSourceLimit = prefs[KEY_PER_SOURCE] ?: 5,
+            currentEditionAt = prefs[KEY_EDITION_AT] ?: 0,
         )
     }
 
@@ -42,8 +50,17 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[KEY_THEME] = mode.name }
     }
 
-    suspend fun setRefreshInterval(minutes: Int) {
-        context.dataStore.edit { it[KEY_INTERVAL] = minutes.coerceAtLeast(MIN_INTERVAL_MINUTES) }
+    suspend fun setEditionHour(hour: Int) {
+        context.dataStore.edit { it[KEY_EDITION_HOUR] = hour.coerceIn(0, 23) }
+    }
+
+    suspend fun setEditionSize(size: Int) {
+        context.dataStore.edit { it[KEY_EDITION_SIZE] = size.coerceAtLeast(0) }
+    }
+
+    /** Opens a new edition: everything fetched from now on belongs to it. */
+    suspend fun startEdition(at: Long) {
+        context.dataStore.edit { it[KEY_EDITION_AT] = at }
     }
 
     suspend fun setNotificationsEnabled(enabled: Boolean) {
@@ -59,17 +76,17 @@ class SettingsStore(private val context: Context) {
     }
 
     companion object {
-        /** WorkManager refuses anything shorter for periodic work. */
-        const val MIN_INTERVAL_MINUTES = 15
-
-        val INTERVAL_CHOICES = listOf(15, 30, 60, 180, 360, 720)
+        val EDITION_HOUR_CHOICES = listOf(6, 7, 8, 12, 18, 21)
         val RETENTION_CHOICES = listOf(7, 14, 30, 90)
 
         /** Zero means no cap. */
+        val EDITION_SIZE_CHOICES = listOf(10, 20, 30, 0)
         val PER_SOURCE_CHOICES = listOf(3, 5, 10, 0)
 
         private val KEY_THEME = stringPreferencesKey("theme")
-        private val KEY_INTERVAL = intPreferencesKey("refresh_interval_minutes")
+        private val KEY_EDITION_HOUR = intPreferencesKey("edition_hour")
+        private val KEY_EDITION_SIZE = intPreferencesKey("edition_size")
+        private val KEY_EDITION_AT = longPreferencesKey("current_edition_at")
         private val KEY_NOTIFICATIONS = booleanPreferencesKey("notifications_enabled")
         private val KEY_RETENTION = intPreferencesKey("retention_days")
         private val KEY_PER_SOURCE = intPreferencesKey("per_source_limit")

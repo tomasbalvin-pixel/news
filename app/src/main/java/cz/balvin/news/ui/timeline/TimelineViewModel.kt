@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -31,11 +31,15 @@ sealed interface TimelineMessage {
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class TimelineViewModel(
     private val repository: NewsRepository,
-    settingsStore: SettingsStore,
+    private val settingsStore: SettingsStore,
 ) : ViewModel() {
 
     private val _filter = MutableStateFlow(TimelineFilter())
     val filter: StateFlow<TimelineFilter> = _filter.asStateFlow()
+
+    /** The edition is the default view; everything else stays one chip away. */
+    private val _editionOnly = MutableStateFlow(true)
+    val editionOnly: StateFlow<Boolean> = _editionOnly.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -51,8 +55,15 @@ class TimelineViewModel(
 
     val articles: StateFlow<List<ArticleListItem>> = combine(
         _filter,
-        settingsStore.settings.map { it.perSourceLimit }.distinctUntilChanged(),
-    ) { filter, perSourceLimit -> filter.copy(perSourceLimit = perSourceLimit) }
+        _editionOnly,
+        settingsStore.settings,
+    ) { filter, editionOnly, settings ->
+        filter.copy(
+            perSourceLimit = settings.perSourceLimit,
+            since = if (editionOnly) settings.currentEditionAt else 0,
+            limit = if (editionOnly) settings.editionSize else 0,
+        )
+    }
         // Typing a query must not re-run the query on every keystroke.
         .debounce { if (it.query.isEmpty()) 0L else 200L }
         .distinctUntilChanged()
@@ -75,6 +86,10 @@ class TimelineViewModel(
         _filter.value = _filter.value.copy(onlyBookmarked = value, onlyUnread = false)
     }
 
+    fun setEditionOnly(value: Boolean) {
+        _editionOnly.value = value
+    }
+
     fun clearFilters() {
         _filter.value = _filter.value.copy(onlyUnread = false, onlyBookmarked = false, category = null)
     }
@@ -83,6 +98,11 @@ class TimelineViewModel(
         if (_isRefreshing.value) return
         viewModelScope.launch {
             _isRefreshing.value = true
+            // A pull before the first scheduled run opens edition one; later pulls
+            // top up the edition already on screen instead of starting a new one.
+            if (settingsStore.settings.first().currentEditionAt == 0L) {
+                settingsStore.startEdition(System.currentTimeMillis())
+            }
             val outcome = runCatching { repository.refreshAll() }.getOrNull()
             _isRefreshing.value = false
             if (outcome != null && outcome.hasFailures) {

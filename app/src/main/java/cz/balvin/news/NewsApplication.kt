@@ -24,7 +24,7 @@ class NewsApplication : Application() {
         applicationScope.launch {
             container.repository.seedDefaultFeedsIfEmpty()
             val settings = container.settingsStore.settings.first()
-            RefreshScheduler.schedule(this@NewsApplication, settings.refreshIntervalMinutes)
+            RefreshScheduler.scheduleDailyEdition(this@NewsApplication, settings.editionHour)
         }
     }
 }

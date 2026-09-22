@@ -262,16 +262,46 @@ class ArticleDaoTest {
         assertEquals(1, timeline(perSourceLimit = 1).size)
     }
 
+    @Test
+    fun `an edition holds what was fetched after its boundary`() = runTest {
+        articleDao.insertAll(
+            listOf(
+                article(domesticFeedId, "before", publishedAt = 900, fetchedAt = 900),
+                article(domesticFeedId, "after", publishedAt = 100, fetchedAt = 1_100),
+            )
+        )
+
+        // Scoped by fetch time, not publication: the older article arrived in this
+        // edition and the newer one did not.
+        assertEquals(listOf("after"), timeline(since = 1_000).map { it.article.guid })
+        assertEquals(2, timeline(since = 0).size)
+    }
+
+    @Test
+    fun `the per-source cap counts inside the edition`() = runTest {
+        articleDao.insertAll(
+            (1..3).map { article(domesticFeedId, "old$it", publishedAt = it.toLong(), fetchedAt = 500) } +
+                (1..3).map { article(domesticFeedId, "new$it", publishedAt = 100L + it, fetchedAt = 1_500) }
+        )
+
+        val edition = timeline(since = 1_000, perSourceLimit = 2)
+
+        assertEquals(setOf("new3", "new2"), edition.map { it.article.guid }.toSet())
+    }
+
     private suspend fun timeline(
         onlyUnread: Boolean = false,
         onlyBookmarked: Boolean = false,
         category: String? = null,
         feedId: Long? = null,
         query: String = "",
+        since: Long = 0,
         perSourceLimit: Int = 0,
         limit: Int = 500,
     ): List<ArticleListItem> = articleDao
-        .observeTimeline(onlyUnread, onlyBookmarked, category, feedId, query, perSourceLimit, limit)
+        .observeTimeline(
+            onlyUnread, onlyBookmarked, category, feedId, query, since, perSourceLimit, limit,
+        )
         .first()
 
     private fun article(
@@ -280,6 +310,7 @@ class ArticleDaoTest {
         title: String = "Titulek $guid",
         summary: String = "Perex $guid",
         publishedAt: Long = 1_000,
+        fetchedAt: Long = publishedAt,
         isRead: Boolean = false,
         isBookmarked: Boolean = false,
     ) = Article(
@@ -292,7 +323,7 @@ class ArticleDaoTest {
         imageUrl = null,
         author = null,
         publishedAt = publishedAt,
-        fetchedAt = publishedAt,
+        fetchedAt = fetchedAt,
         isRead = isRead,
         isBookmarked = isBookmarked,
     )

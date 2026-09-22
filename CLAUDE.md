@@ -1,5 +1,11 @@
 # Zprávy — pokyny pro práci na projektu
 
+## Co to je
+
+Čtečka **zpravodajství** — RSS/Atom kanály, ne chat. Potvrzeno zadavatelem.
+Větev se jmenuje `claude/android-messaging-app-atmauj`, což svádí k opaku;
+je to artefakt pojmenování při zakládání session, ne záměr. Neřiď se jím.
+
 ## Instalace na zařízení
 
 **Buildy neposílej přes GitHub Release ani přes artefakty Actions.** Instaluj

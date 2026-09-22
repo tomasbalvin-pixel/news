@@ -1,5 +1,7 @@
 # Zprávy
 
+[![Android](https://github.com/tomasbalvin-pixel/news/actions/workflows/android.yml/badge.svg?branch=claude/android-messaging-app-atmauj)](https://github.com/tomasbalvin-pixel/news/actions/workflows/android.yml)
+
 Čtečka zpráv pro Android. Stahuje RSS/Atom kanály, drží je offline v Room databázi
 a skládá z nich jeden proud článků tříděný podle času vydání.
 
@@ -69,7 +71,11 @@ stahování je omezené na čtyři kanály.
 ```bash
 ./gradlew assembleDebug        # APK
 ./gradlew testDebugUnitTest    # unit testy
+./gradlew lintDebug            # lint
 ```
+
+Stejné tři kroky běží v CI na každý push; podepsané debug APK je ke stažení
+jako artefakt `app-debug` z běhu workflow.
 
 ## Zdroje
 

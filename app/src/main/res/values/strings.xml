@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zprávy</string>
+
+    <string name="tab_timeline">Headlines</string>
+    <string name="tab_feeds">Sources</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="action_search">Search</string>
+    <string name="action_close">Close</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_back">Back</string>
+    <string name="action_share">Share</string>
+    <string name="action_bookmark">Bookmark</string>
+    <string name="action_open_original">Open original</string>
+    <string name="action_add_feed">Add source</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_mark_all_read">Mark all as read</string>
+
+    <string name="filter_all">All</string>
+    <string name="filter_unread">Unread</string>
+    <string name="filter_bookmarked">Saved</string>
+
+    <string name="search_hint">Search headlines</string>
+    <string name="empty_timeline">No articles yet. Pull down to refresh.</string>
+    <string name="empty_search">Nothing matches your search.</string>
+    <string name="empty_feeds">No sources yet.</string>
+
+    <string name="feed_url_hint">Feed URL (RSS or Atom)</string>
+    <string name="feed_name_hint">Name (optional)</string>
+    <string name="feed_category_hint">Category</string>
+    <string name="feed_add_error">Could not read this feed.</string>
+    <string name="feed_duplicate">This source is already on the list.</string>
+    <string name="feed_disabled">Paused</string>
+
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_sync">Background refresh</string>
+    <string name="settings_interval">Refresh interval</string>
+    <string name="settings_notifications">Notify about new articles</string>
+    <string name="settings_storage">Storage</string>
+    <string name="settings_retention">Keep articles for</string>
+    <string name="settings_days">%1$d days</string>
+    <string name="settings_minutes">%1$d min</string>
+    <string name="settings_hours">%1$d h</string>
+
+    <string name="notification_channel_name">New articles</string>
+    <string name="notification_channel_description">Notifications about newly downloaded articles.</string>
+    <string name="notification_title">%1$d new articles</string>
+
+    <string name="refresh_failed">Refresh failed: %1$s</string>
+    <string name="refresh_partial">%1$d sources could not be refreshed.</string>
+    <string name="marked_all_read">All articles marked as read.</string>
+    <string name="unknown_source">Unknown source</string>
+</resources>

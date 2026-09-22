@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Zprávy</string>
+    <!-- The app name is a proper noun, the same in every locale. -->
+    <string name="app_name" translatable="false">Zprávy</string>
 
     <string name="tab_timeline">Headlines</string>
     <string name="tab_feeds">Sources</string>

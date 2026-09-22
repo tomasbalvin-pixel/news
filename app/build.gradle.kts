@@ -47,12 +47,6 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
-
-    lint {
-        // Without this a CI failure shows only the first issue.
-        textReport = true
-        textOutput = file("stdout")
-    }
 }
 
 kotlin {

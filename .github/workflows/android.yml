@@ -30,6 +30,13 @@ jobs:
       - name: Lint
         run: ./gradlew --no-daemon lintDebug
 
+      # Gradle prints only the first failure; the report lists them all.
+      - name: Print lint report
+        if: failure()
+        run: >
+          cat app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/lint-results-debug.txt
+          || true
+
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4

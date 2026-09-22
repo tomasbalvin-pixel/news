@@ -24,20 +24,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # Scripted edits can re-apply and leave a file importing the same name
-      # twice, which costs a whole build cycle to find out about.
-      - name: Reject duplicated imports
-        run: |
-          status=0
-          for file in $(find app/src -name '*.kt'); do
-            dups=$(grep '^import ' "$file" | sort | uniq -d)
-            if [ -n "$dups" ]; then
-              echo "$file"
-              echo "$dups" | sed 's/^/  /'
-              status=1
-            fi
-          done
-          exit $status
+      - name: Static checks
+        run: python3 tools/check_sources.py
 
       - name: Unit tests
         run: ./gradlew --no-daemon testDebugUnitTest

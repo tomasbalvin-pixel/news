@@ -20,7 +20,7 @@
     <string name="action_save">Save</string>
     <string name="action_mark_all_read">Mark all as read</string>
 
-    <string name="filter_edition">Today's edition</string>
+    <string name="filter_edition">Today\'s edition</string>
     <string name="filter_all">All</string>
     <string name="filter_unread">Unread</string>
     <string name="filter_bookmarked">Saved</string>

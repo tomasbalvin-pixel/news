@@ -83,6 +83,132 @@ class RssParserTest {
         assertNull(feed.title)
     }
 
+    @Test
+    fun `honours a non-UTF8 encoding declared in the prolog`() {
+        val xml = """
+            <?xml version="1.0" encoding="windows-1250"?>
+            <rss version="2.0"><channel>
+              <title>Příliš žluťoučký kůň</title>
+              <link>https://example.cz</link>
+              <item><title>Šíleně žlutá zpráva</title><link>https://example.cz/x</link></item>
+            </channel></rss>
+        """.trimIndent()
+
+        val feed = RssParser.parse(xml.toByteArray(charset("windows-1250")))
+
+        assertEquals("Příliš žluťoučký kůň", feed.title)
+        assertEquals("Šíleně žlutá zpráva", feed.items.single().title)
+    }
+
+    @Test
+    fun `takes the body from an Atom content element`() {
+        val xml = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <feed xmlns="http://www.w3.org/2005/Atom">
+              <title>T</title>
+              <entry>
+                <title>E</title>
+                <id>urn:1</id>
+                <link href="https://example.org/e"/>
+                <summary>Short</summary>
+                <content type="html">&lt;p&gt;Long body&lt;/p&gt;</content>
+              </entry>
+            </feed>
+        """.trimIndent()
+
+        val item = RssParser.parse(xml.toByteArray()).items.single()
+
+        assertEquals("<p>Long body</p>", item.content)
+        assertEquals("Short", item.summary)
+        assertEquals("https://example.org/e", item.link)
+    }
+
+    @Test
+    fun `reads media namespace images`() {
+        val xml = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel>
+              <item>
+                <title>A</title><link>https://e.cz/a</link>
+                <media:content url="https://cdn.e.cz/big" medium="image"/>
+              </item>
+              <item>
+                <title>B</title><link>https://e.cz/b</link>
+                <media:thumbnail url="https://cdn.e.cz/thumb"/>
+              </item>
+            </channel></rss>
+        """.trimIndent()
+
+        val items = RssParser.parse(xml.toByteArray()).items
+
+        assertEquals("https://cdn.e.cz/big", items[0].imageUrl)
+        assertEquals("https://cdn.e.cz/thumb", items[1].imageUrl)
+    }
+
+    @Test
+    fun `leaves the date null when the item carries none`() {
+        val xml = """
+            <rss version="2.0"><channel>
+              <item><title>Undated</title><link>https://e.cz/u</link></item>
+            </channel></rss>
+        """.trimIndent()
+
+        assertNull(RssParser.parse(xml.toByteArray()).items.single().publishedAt)
+    }
+
+    @Test
+    fun `unwraps CDATA titles and decodes their entities`() {
+        val xml = """
+            <rss version="2.0"><channel>
+              <item>
+                <title><![CDATA[Ministr &amp; premiér <b>jednali</b>]]></title>
+                <link>https://e.cz/c</link>
+              </item>
+            </channel></rss>
+        """.trimIndent()
+
+        assertEquals(
+            "Ministr & premiér jednali",
+            RssParser.parse(xml.toByteArray()).items.single().title,
+        )
+    }
+
+    @Test
+    fun `falls back to the guid when the item has no link`() {
+        val xml = """
+            <rss version="2.0"><channel>
+              <item>
+                <title>No link</title>
+                <guid isPermaLink="true">https://e.cz/only-guid</guid>
+              </item>
+            </channel></rss>
+        """.trimIndent()
+
+        val item = RssParser.parse(xml.toByteArray()).items.single()
+
+        assertEquals("https://e.cz/only-guid", item.link)
+        assertEquals("https://e.cz/only-guid", item.guid)
+    }
+
+    @Test
+    fun `refuses external entities instead of resolving them`() {
+        val xml = """
+            <?xml version="1.0"?>
+            <!DOCTYPE rss [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+            <rss version="2.0"><channel>
+              <item><title>&xxe;</title><link>https://e.cz/x</link></item>
+            </channel></rss>
+        """.trimIndent()
+
+        // Either the document is rejected outright or the entity stays unexpanded;
+        // what must never happen is the file's contents reaching an article.
+        val titles = runCatching { RssParser.parse(xml.toByteArray()) }
+            .map { feed -> feed.items.map(ParsedItem::title) }
+            .getOrElse { emptyList() }
+
+        assertTrue(titles.none { it.contains("root:") })
+    }
+
     private companion object {
         val RSS_2 = """
             <?xml version="1.0" encoding="UTF-8"?>

@@ -53,8 +53,7 @@ fun NewsNavHost() {
 
     Scaffold(
         bottomBar = {
-            if (!showBottomBar) return@Scaffold
-            NavigationBar {
+            if (showBottomBar) NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->
                     val selected = currentDestination?.hierarchy
                         ?.any { it.route == destination.route } == true

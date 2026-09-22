@@ -152,6 +152,7 @@ fun TimelineScreen(
                     onCategory = viewModel::setCategory,
                     onUnread = viewModel::setOnlyUnread,
                     onBookmarked = viewModel::setOnlyBookmarked,
+                    onClearAll = viewModel::clearFilters,
                 )
 
                 if (articles.isEmpty()) {
@@ -217,6 +218,7 @@ private fun FilterRow(
     onCategory: (String?) -> Unit,
     onUnread: (Boolean) -> Unit,
     onBookmarked: (Boolean) -> Unit,
+    onClearAll: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -228,11 +230,7 @@ private fun FilterRow(
     ) {
         FilterChip(
             selected = !onlyUnread && !onlyBookmarked && selectedCategory == null,
-            onClick = {
-                onUnread(false)
-                onBookmarked(false)
-                onCategory(null)
-            },
+            onClick = onClearAll,
             label = { Text(stringResource(R.string.filter_all)) },
         )
         FilterChip(

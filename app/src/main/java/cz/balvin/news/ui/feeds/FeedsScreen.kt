@@ -206,10 +206,7 @@ private fun AddFeedDialog(
                 enabled = !isSubmitting && url.isNotBlank(),
             ) {
                 if (isSubmitting) {
-                    CircularProgressIndicator(
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(16.dp).padding(end = 0.dp),
-                    )
+                    CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
                 }
                 Text(stringResource(R.string.action_save))
             }

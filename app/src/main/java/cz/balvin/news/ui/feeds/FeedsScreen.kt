@@ -140,13 +140,14 @@ private fun FeedRow(feed: Feed, onToggle: (Boolean) -> Unit, onDelete: () -> Uni
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                // Whatever the server or the stack said, verbatim and unclipped:
+                // a truncated error is the one thing that cannot be acted on.
                 feed.lastError?.takeIf { it.isNotBlank() && feed.enabled }?.let { error ->
                     Text(
                         text = error,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp),
                     )
                 }
             }

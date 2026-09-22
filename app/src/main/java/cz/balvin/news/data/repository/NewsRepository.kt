@@ -1,7 +1,10 @@
 package cz.balvin.news.data.repository
 
+import android.util.Log
 import cz.balvin.news.data.local.Article
+import android.util.Log
 import cz.balvin.news.data.local.ArticleDao
+import android.util.Log
 import cz.balvin.news.data.local.ArticleListItem
 import cz.balvin.news.data.local.DefaultFeeds
 import cz.balvin.news.data.local.Feed
@@ -137,6 +140,8 @@ class NewsRepository(
             }
 
             is FeedService.Result.Failure -> {
+                // Also to logcat, so a cable is enough to read what went wrong.
+                Log.w(TAG, "Feed failed: ${feed.title} <${feed.url}> — ${result.message}")
                 feedDao.recordFetch(feed.id, timestamp, result.message, feed.etag, feed.lastModified)
                 0 to feed.title
             }
@@ -186,6 +191,7 @@ class NewsRepository(
     }
 
     private companion object {
+        const val TAG = "NewsRepository"
         const val TIMELINE_LIMIT = 500
         const val MAX_CONCURRENT_FETCHES = 4
     }

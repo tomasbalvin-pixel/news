@@ -52,7 +52,7 @@
     <string name="notification_title">%1$d nových článků</string>
 
     <string name="refresh_failed">Aktualizace selhala: %1$s</string>
-    <string name="refresh_partial">%1$d zdrojů se nepodařilo načíst.</string>
+    <string name="refresh_partial">%1$d zdrojů selhalo: %2$s</string>
     <string name="marked_all_read">Vše označeno jako přečtené.</string>
     <string name="unknown_source">Neznámý zdroj</string>
 </resources>

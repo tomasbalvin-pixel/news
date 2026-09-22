@@ -26,8 +26,11 @@ class NewsRepository(
     private val now: () -> Long = System::currentTimeMillis,
 ) {
 
-    data class RefreshOutcome(val newArticles: Int, val failedFeeds: List<String>) {
-        val hasFailures: Boolean get() = failedFeeds.isNotEmpty()
+    /** A failure carries its reason, not just the fact that it happened. */
+    data class FeedFailure(val title: String, val message: String)
+
+    data class RefreshOutcome(val newArticles: Int, val failures: List<FeedFailure>) {
+        val hasFailures: Boolean get() = failures.isNotEmpty()
     }
 
     sealed interface AddFeedResult {
@@ -126,12 +129,12 @@ class NewsRepository(
 
         RefreshOutcome(
             newArticles = results.sumOf { it.first },
-            failedFeeds = results.mapNotNull { it.second },
+            failures = results.mapNotNull { it.second },
         )
     }
 
-    /** Returns the number of newly stored articles and the feed title if it failed. */
-    private suspend fun refreshFeed(feed: Feed): Pair<Int, String?> {
+    /** Returns the number of newly stored articles and the failure, if there was one. */
+    private suspend fun refreshFeed(feed: Feed): Pair<Int, FeedFailure?> {
         val timestamp = now()
         return when (val result = feedService.fetch(feed.url, feed.etag, feed.lastModified)) {
             FeedService.Result.NotModified -> {
@@ -143,7 +146,7 @@ class NewsRepository(
                 // Also to logcat, so a cable is enough to read what went wrong.
                 Log.w(TAG, "Feed failed: ${feed.title} <${feed.url}> — ${result.message}")
                 feedDao.recordFetch(feed.id, timestamp, result.message, feed.etag, feed.lastModified)
-                0 to feed.title
+                0 to FeedFailure(feed.title, result.message)
             }
 
             is FeedService.Result.Success -> {

@@ -24,7 +24,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -72,13 +74,17 @@ fun TimelineScreen(
     val listState = rememberLazyListState()
 
     val messageText = when (val current = message) {
-        is TimelineMessage.PartialFailure -> stringResource(R.string.refresh_partial, current.feedCount)
+        is TimelineMessage.PartialFailure ->
+            stringResource(R.string.refresh_partial, current.feedCount, current.reason)
         TimelineMessage.MarkedAllRead -> stringResource(R.string.marked_all_read)
         null -> null
     }
     LaunchedEffect(messageText) {
         if (messageText == null) return@LaunchedEffect
-        snackbarHostState.showSnackbar(messageText)
+        snackbarHostState.showSnackbar(
+            message = messageText,
+            duration = SnackbarDuration.Long,
+        )
         viewModel.consumeMessage()
     }
 

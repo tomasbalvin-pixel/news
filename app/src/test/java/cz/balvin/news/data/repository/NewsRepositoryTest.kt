@@ -103,7 +103,7 @@ class NewsRepositoryTest {
         val outcome = repository.refreshAll()
 
         assertEquals(0, outcome.newArticles)
-        assertTrue(outcome.failedFeeds.isEmpty())
+        assertTrue(outcome.failures.isEmpty())
         assertEquals("W/\"v1\"", feedDao.byId(id)!!.etag)
     }
 
@@ -114,7 +114,8 @@ class NewsRepositoryTest {
 
         val outcome = repository.refreshAll()
 
-        assertEquals(listOf("Deník"), outcome.failedFeeds)
+        assertEquals(listOf("Deník"), outcome.failures.map { it.title })
+        assertEquals(listOf("HTTP 503"), outcome.failures.map { it.message })
         assertEquals("HTTP 503", feedDao.byId(id)!!.lastError)
     }
 
@@ -128,7 +129,7 @@ class NewsRepositoryTest {
         val outcome = repository.refreshAll()
 
         assertEquals(2, outcome.newArticles)
-        assertEquals(listOf("Deník"), outcome.failedFeeds)
+        assertEquals(listOf("Deník"), outcome.failures.map { it.title })
     }
 
     @Test

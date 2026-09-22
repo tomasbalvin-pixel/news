@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed interface TimelineMessage {
-    data class PartialFailure(val feedCount: Int) : TimelineMessage
+    data class PartialFailure(val feedCount: Int, val reason: String) : TimelineMessage
     data object MarkedAllRead : TimelineMessage
 }
 
@@ -77,7 +77,10 @@ class TimelineViewModel(private val repository: NewsRepository) : ViewModel() {
             val outcome = runCatching { repository.refreshAll() }.getOrNull()
             _isRefreshing.value = false
             if (outcome != null && outcome.hasFailures) {
-                _message.value = TimelineMessage.PartialFailure(outcome.failedFeeds.size)
+                _message.value = TimelineMessage.PartialFailure(
+                    feedCount = outcome.failures.size,
+                    reason = outcome.failures.first().message,
+                )
             }
         }
     }

@@ -55,7 +55,7 @@
     <string name="notification_title">%1$d new articles</string>
 
     <string name="refresh_failed">Refresh failed: %1$s</string>
-    <string name="refresh_partial">%1$d sources could not be refreshed.</string>
+    <string name="refresh_partial">%1$d sources failed: %2$s</string>
     <string name="marked_all_read">All articles marked as read.</string>
     <string name="unknown_source">Unknown source</string>
 </resources>

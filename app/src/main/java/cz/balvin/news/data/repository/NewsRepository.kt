@@ -54,6 +54,7 @@ class NewsRepository(
             category = filter.category,
             feedId = filter.feedId,
             query = filter.query.trim(),
+            perSourceLimit = filter.perSourceLimit,
             limit = TIMELINE_LIMIT,
         )
 

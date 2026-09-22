@@ -44,6 +44,10 @@
     <string name="settings_sync">Background refresh</string>
     <string name="settings_interval">Refresh interval</string>
     <string name="settings_notifications">Notify about new articles</string>
+    <string name="settings_volume">Volume</string>
+    <string name="settings_per_source">Articles per source</string>
+    <string name="per_source_count">%1$d newest</string>
+    <string name="per_source_unlimited">No limit</string>
     <string name="settings_storage">Storage</string>
     <string name="settings_retention">Keep articles for</string>
     <string name="settings_days">%1$d days</string>

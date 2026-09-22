@@ -12,6 +12,12 @@ interface ArticleDao {
     /**
      * One query backs every timeline variant; a null or empty parameter disables
      * the matching clause rather than selecting nothing.
+     *
+     * [perSourceLimit] keeps a prolific source from burying the rest: an article
+     * is shown only when fewer than that many newer ones from the same feed also
+     * pass the current filters. The rank is counted with a correlated subquery
+     * rather than a window function, which SQLite only gained in a version newer
+     * than this app's minimum. Zero or less means no cap.
      */
     @Query(
         """
@@ -27,6 +33,24 @@ interface ArticleDao {
                 OR a.title LIKE '%' || :query || '%'
                 OR a.summary LIKE '%' || :query || '%'
               )
+          AND (
+                :perSourceLimit <= 0
+                OR (
+                    SELECT COUNT(*) FROM articles n
+                    WHERE n.feedId = a.feedId
+                      AND (
+                            n.publishedAt > a.publishedAt
+                            OR (n.publishedAt = a.publishedAt AND n.id > a.id)
+                          )
+                      AND (:onlyUnread = 0 OR n.isRead = 0)
+                      AND (:onlyBookmarked = 0 OR n.isBookmarked = 1)
+                      AND (
+                            :query = ''
+                            OR n.title LIKE '%' || :query || '%'
+                            OR n.summary LIKE '%' || :query || '%'
+                          )
+                ) < :perSourceLimit
+              )
         ORDER BY a.publishedAt DESC
         LIMIT :limit
         """
@@ -37,6 +61,7 @@ interface ArticleDao {
         category: String?,
         feedId: Long?,
         query: String,
+        perSourceLimit: Int,
         limit: Int,
     ): Flow<List<ArticleListItem>>
 

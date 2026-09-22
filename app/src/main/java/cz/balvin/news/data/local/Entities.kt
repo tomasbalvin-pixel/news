@@ -29,6 +29,7 @@ data class Feed(
     indices = [
         Index(value = ["feedId", "guid"], unique = true),
         Index(value = ["publishedAt"]),
+        Index(value = ["feedId", "publishedAt"]),
         Index(value = ["isBookmarked"]),
     ],
     foreignKeys = [

@@ -42,6 +42,10 @@ class SettingsViewModel(
         viewModelScope.launch { settingsStore.setNotificationsEnabled(enabled) }
     }
 
+    fun setPerSourceLimit(limit: Int) {
+        viewModelScope.launch { settingsStore.setPerSourceLimit(limit) }
+    }
+
     fun setRetentionDays(days: Int) {
         viewModelScope.launch {
             settingsStore.setRetentionDays(days)

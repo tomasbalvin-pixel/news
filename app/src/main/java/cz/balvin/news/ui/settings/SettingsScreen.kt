@@ -76,6 +76,15 @@ fun SettingsScreen(
             )
 
             HorizontalDivider()
+            SectionHeader(stringResource(R.string.settings_volume))
+            ChoiceRow(
+                label = stringResource(R.string.settings_per_source),
+                value = perSourceLabel(settings.perSourceLimit),
+                options = SettingsStore.PER_SOURCE_CHOICES.map { it to perSourceLabel(it) },
+                onSelect = viewModel::setPerSourceLimit,
+            )
+
+            HorizontalDivider()
             SectionHeader(stringResource(R.string.settings_storage))
             ChoiceRow(
                 label = stringResource(R.string.settings_retention),
@@ -94,6 +103,14 @@ fun SettingsScreen(
         }
     }
 }
+
+@Composable
+private fun perSourceLabel(limit: Int): String =
+    if (limit <= 0) {
+        stringResource(R.string.per_source_unlimited)
+    } else {
+        stringResource(R.string.per_source_count, limit)
+    }
 
 @Composable
 private fun intervalLabel(minutes: Int): String =

@@ -18,6 +18,8 @@ data class Settings(
     val refreshIntervalMinutes: Int = 60,
     val notificationsEnabled: Boolean = true,
     val retentionDays: Int = 30,
+    /** Articles shown per source in the timeline; zero lifts the cap. */
+    val perSourceLimit: Int = 5,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -32,6 +34,7 @@ class SettingsStore(private val context: Context) {
             refreshIntervalMinutes = prefs[KEY_INTERVAL] ?: 60,
             notificationsEnabled = prefs[KEY_NOTIFICATIONS] ?: true,
             retentionDays = prefs[KEY_RETENTION] ?: 30,
+            perSourceLimit = prefs[KEY_PER_SOURCE] ?: 5,
         )
     }
 
@@ -47,6 +50,10 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[KEY_NOTIFICATIONS] = enabled }
     }
 
+    suspend fun setPerSourceLimit(limit: Int) {
+        context.dataStore.edit { it[KEY_PER_SOURCE] = limit.coerceAtLeast(0) }
+    }
+
     suspend fun setRetentionDays(days: Int) {
         context.dataStore.edit { it[KEY_RETENTION] = days.coerceAtLeast(1) }
     }
@@ -58,9 +65,13 @@ class SettingsStore(private val context: Context) {
         val INTERVAL_CHOICES = listOf(15, 30, 60, 180, 360, 720)
         val RETENTION_CHOICES = listOf(7, 14, 30, 90)
 
+        /** Zero means no cap. */
+        val PER_SOURCE_CHOICES = listOf(3, 5, 10, 0)
+
         private val KEY_THEME = stringPreferencesKey("theme")
         private val KEY_INTERVAL = intPreferencesKey("refresh_interval_minutes")
         private val KEY_NOTIFICATIONS = booleanPreferencesKey("notifications_enabled")
         private val KEY_RETENTION = intPreferencesKey("retention_days")
+        private val KEY_PER_SOURCE = intPreferencesKey("per_source_limit")
     }
 }

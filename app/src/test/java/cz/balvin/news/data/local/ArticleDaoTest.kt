@@ -211,15 +211,67 @@ class ArticleDaoTest {
         assertEquals(0, articleDao.observeUnreadCount().first())
     }
 
+    @Test
+    fun `the per-source cap keeps the newest few from each feed`() = runTest {
+        articleDao.insertAll(
+            (1..5).map { article(domesticFeedId, "d$it", publishedAt = it.toLong()) } +
+                (1..5).map { article(techFeedId, "t$it", publishedAt = it.toLong()) }
+        )
+
+        val capped = timeline(perSourceLimit = 2)
+
+        assertEquals(4, capped.size)
+        assertEquals(
+            setOf("d5", "d4", "t5", "t4"),
+            capped.map { it.article.guid }.toSet(),
+        )
+    }
+
+    @Test
+    fun `a cap of zero lifts the limit`() = runTest {
+        articleDao.insertAll((1..5).map { article(domesticFeedId, "d$it", publishedAt = it.toLong()) })
+
+        assertEquals(5, timeline(perSourceLimit = 0).size)
+    }
+
+    @Test
+    fun `the cap counts within the active filter, not the whole feed`() = runTest {
+        // The three newest are read; an unread view must still show the older ones
+        // rather than spending the cap on articles it is not displaying.
+        articleDao.insertAll(
+            listOf(
+                article(domesticFeedId, "new1", publishedAt = 50, isRead = true),
+                article(domesticFeedId, "new2", publishedAt = 40, isRead = true),
+                article(domesticFeedId, "new3", publishedAt = 30, isRead = true),
+                article(domesticFeedId, "old1", publishedAt = 20),
+                article(domesticFeedId, "old2", publishedAt = 10),
+            )
+        )
+
+        val unread = timeline(onlyUnread = true, perSourceLimit = 2)
+
+        assertEquals(listOf("old1", "old2"), unread.map { it.article.guid })
+    }
+
+    @Test
+    fun `articles sharing a timestamp do not both escape the cap`() = runTest {
+        articleDao.insertAll(
+            (1..4).map { article(domesticFeedId, "same$it", publishedAt = 1_000) }
+        )
+
+        assertEquals(1, timeline(perSourceLimit = 1).size)
+    }
+
     private suspend fun timeline(
         onlyUnread: Boolean = false,
         onlyBookmarked: Boolean = false,
         category: String? = null,
         feedId: Long? = null,
         query: String = "",
+        perSourceLimit: Int = 0,
         limit: Int = 500,
     ): List<ArticleListItem> = articleDao
-        .observeTimeline(onlyUnread, onlyBookmarked, category, feedId, query, limit)
+        .observeTimeline(onlyUnread, onlyBookmarked, category, feedId, query, perSourceLimit, limit)
         .first()
 
     private fun article(

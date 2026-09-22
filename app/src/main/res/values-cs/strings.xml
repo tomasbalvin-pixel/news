@@ -41,6 +41,10 @@
     <string name="settings_sync">Aktualizace na pozadí</string>
     <string name="settings_interval">Interval aktualizace</string>
     <string name="settings_notifications">Upozorňovat na nové články</string>
+    <string name="settings_volume">Objem</string>
+    <string name="settings_per_source">Článků na zdroj</string>
+    <string name="per_source_count">%1$d nejnovějších</string>
+    <string name="per_source_unlimited">Bez omezení</string>
     <string name="settings_storage">Úložiště</string>
     <string name="settings_retention">Uchovávat články</string>
     <string name="settings_days">%1$d dní</string>

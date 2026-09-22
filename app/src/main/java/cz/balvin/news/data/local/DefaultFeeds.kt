@@ -55,10 +55,12 @@ object DefaultFeeds {
             siteUrl = "https://www.bbc.com/news/world",
             category = CATEGORY_WORLD,
         ),
+        // Reuters withdrew its public RSS; the feed 404s. The Guardian's world
+        // feed has been stable for years and needs no key.
         Feed(
-            title = "Reuters World",
-            url = "https://www.reutersagency.com/feed/?best-topics=world&post_type=best",
-            siteUrl = "https://www.reuters.com",
+            title = "The Guardian — World",
+            url = "https://www.theguardian.com/world/rss",
+            siteUrl = "https://www.theguardian.com/world",
             category = CATEGORY_WORLD,
         ),
         Feed(

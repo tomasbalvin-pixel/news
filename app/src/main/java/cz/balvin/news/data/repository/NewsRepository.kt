@@ -2,9 +2,7 @@ package cz.balvin.news.data.repository
 
 import android.util.Log
 import cz.balvin.news.data.local.Article
-import android.util.Log
 import cz.balvin.news.data.local.ArticleDao
-import android.util.Log
 import cz.balvin.news.data.local.ArticleListItem
 import cz.balvin.news.data.local.DefaultFeeds
 import cz.balvin.news.data.local.Feed

@@ -32,7 +32,7 @@ object Notifier {
     }
 
     fun notifyNewArticles(context: Context, count: Int, headline: String?) {
-        if (count <= 0 || !hasPermission(context)) return
+        if (count <= 0 || !canPost(context)) return
         ensureChannel(context)
 
         val intent = Intent(context, MainActivity::class.java)
@@ -54,12 +54,16 @@ object Notifier {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
-        runCatching {
+        // The permission can be revoked between the check above and this call,
+        // and a dropped notification is not worth failing the refresh over.
+        try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        } catch (_: SecurityException) {
+            return
         }
     }
 
-    private fun hasPermission(context: Context): Boolean =
+    private fun canPost(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(
                 context,

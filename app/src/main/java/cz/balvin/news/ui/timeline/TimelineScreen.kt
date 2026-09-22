@@ -1,7 +1,6 @@
 package cz.balvin.news.ui.timeline
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -156,7 +156,10 @@ fun TimelineScreen(
                 )
 
                 if (articles.isEmpty()) {
-                    EmptyState(searching = filter.query.isNotBlank())
+                    EmptyState(
+                        searching = filter.query.isNotBlank(),
+                        onRefresh = viewModel::refresh,
+                    )
                 } else {
                     ArticleList(
                         articles = articles,
@@ -254,15 +257,39 @@ private fun FilterRow(
     }
 }
 
+/**
+ * Pull-to-refresh is driven by nested scroll, so an empty screen still has to be
+ * a scrollable — a plain Box swallows the gesture and the first launch, which is
+ * exactly when the timeline is empty, offers no way to load anything. The list
+ * dispatches nested scroll even with nothing to scroll, and the button covers
+ * the case where the gesture is not discovered at all.
+ */
 @Composable
-private fun EmptyState(searching: Boolean) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = stringResource(if (searching) R.string.empty_search else R.string.empty_timeline),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(32.dp),
-        )
+private fun EmptyState(searching: Boolean, onRefresh: () -> Unit) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
+            Column(
+                modifier = Modifier.fillParentMaxSize().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = stringResource(
+                        if (searching) R.string.empty_search else R.string.empty_timeline
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                if (!searching) {
+                    Button(
+                        onClick = onRefresh,
+                        modifier = Modifier.padding(top = 20.dp),
+                    ) {
+                        Text(stringResource(R.string.action_refresh))
+                    }
+                }
+            }
+        }
     }
 }

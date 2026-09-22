@@ -1,8 +1,10 @@
 package cz.balvin.news.data.local
 
+import android.app.Application
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -18,7 +20,7 @@ import org.robolectric.annotation.Config
  * real SQLite database rather than trusted to read correctly.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], application = Application::class)
 class ArticleDaoTest {
 
     private lateinit var database: AppDatabase
@@ -29,7 +31,7 @@ class ArticleDaoTest {
     private var techFeedId = 0L
 
     @Before
-    fun setUp() = runTest {
+    fun setUp() = runBlocking {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             AppDatabase::class.java,

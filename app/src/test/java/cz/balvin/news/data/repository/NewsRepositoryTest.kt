@@ -1,5 +1,6 @@
 package cz.balvin.news.data.repository
 
+import android.app.Application
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import cz.balvin.news.data.local.AppDatabase
@@ -21,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], application = Application::class)
 class NewsRepositoryTest {
 
     private lateinit var database: AppDatabase

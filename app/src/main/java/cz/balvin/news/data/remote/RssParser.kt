@@ -4,7 +4,10 @@ import cz.balvin.news.util.DateParsing
 import cz.balvin.news.util.Html
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import org.xml.sax.InputSource
 import java.io.ByteArrayInputStream
+import java.io.StringReader
+import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
@@ -13,8 +16,12 @@ import javax.xml.parsers.DocumentBuilderFactory
  * Parsing runs namespace-unaware and matches on the local part of each tag, so
  * a feed that writes `content:encoded`, `media:content` or `dc:date` is handled
  * without knowing which prefix it bound to which namespace. DOM is used rather
- * than a pull parser because it works identically on Android and on the JVM,
- * which keeps the parser under plain unit tests.
+ * than a pull parser because it runs under plain JVM unit tests.
+ *
+ * The two platforms are not interchangeable, though: their factory
+ * implementations disagree about which optional settings exist, so a green test
+ * run here does not prove the configuration below works on a device. See
+ * [documentBuilder].
  */
 object RssParser {
 
@@ -34,22 +41,37 @@ object RssParser {
 
     /**
      * A feed is untrusted input, so doctype declarations and external entities
-     * are refused outright. Not every parser implementation knows every feature
-     * name; an unsupported one is skipped rather than failing the fetch.
+     * are refused.
+     *
+     * Every optional setting goes through [harden] because implementations
+     * disagree about which of them exist: Android's DocumentBuilderFactory does
+     * not override setXIncludeAware, so the base class throws
+     * UnsupportedOperationException unconditionally, while the JVM's Xerces
+     * implements it and does nothing. An unguarded call there fails every parse
+     * on the device and none on a test machine.
+     *
+     * The entity resolver is what actually guarantees the XXE defence: unlike
+     * the feature flags, it is honoured by every implementation.
      */
-    private fun documentBuilder() = DocumentBuilderFactory.newInstance().apply {
-        isNamespaceAware = false
-        isValidating = false
-        harden("http://apache.org/xml/features/disallow-doctype-decl", true)
-        harden("http://xml.org/sax/features/external-general-entities", false)
-        harden("http://xml.org/sax/features/external-parameter-entities", false)
-        harden("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-        isXIncludeAware = false
-        isExpandEntityReferences = false
-    }.newDocumentBuilder()
+    private fun documentBuilder(): DocumentBuilder {
+        val factory = DocumentBuilderFactory.newInstance()
+        factory.isNamespaceAware = false
+        factory.isValidating = false
+        harden { factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true) }
+        harden { factory.setFeature("http://xml.org/sax/features/external-general-entities", false) }
+        harden { factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false) }
+        harden { factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false) }
+        harden { factory.isXIncludeAware = false }
+        harden { factory.isExpandEntityReferences = false }
 
-    private fun DocumentBuilderFactory.harden(feature: String, value: Boolean) {
-        runCatching { setFeature(feature, value) }
+        return factory.newDocumentBuilder().apply {
+            setEntityResolver { _, _ -> InputSource(StringReader("")) }
+        }
+    }
+
+    /** Applies one optional setting, ignoring implementations that reject it. */
+    private inline fun harden(apply: () -> Unit) {
+        runCatching(apply)
     }
 
     // ---- RSS 2.0 -----------------------------------------------------------

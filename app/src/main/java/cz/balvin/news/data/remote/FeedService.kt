@@ -8,7 +8,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /** Fetches one feed document and hands it to [RssParser]. */
-class FeedService(private val client: OkHttpClient = defaultClient()) {
+interface FeedService {
 
     sealed interface Result {
         data class Success(
@@ -23,7 +23,13 @@ class FeedService(private val client: OkHttpClient = defaultClient()) {
         data class Failure(val message: String) : Result
     }
 
-    suspend fun fetch(url: String, etag: String? = null, lastModified: String? = null): Result =
+    suspend fun fetch(url: String, etag: String? = null, lastModified: String? = null): Result
+}
+
+/** The real one. Tests substitute their own [FeedService] instead of a server. */
+class HttpFeedService(private val client: OkHttpClient = defaultClient()) : FeedService {
+
+    override suspend fun fetch(url: String, etag: String?, lastModified: String?): FeedService.Result =
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url(url)
@@ -37,27 +43,27 @@ class FeedService(private val client: OkHttpClient = defaultClient()) {
 
             try {
                 client.newCall(request).execute().use { response ->
-                    if (response.code == 304) return@withContext Result.NotModified
+                    if (response.code == 304) return@withContext FeedService.Result.NotModified
                     if (!response.isSuccessful) {
-                        return@withContext Result.Failure("HTTP ${response.code}")
+                        return@withContext FeedService.Result.Failure("HTTP ${response.code}")
                     }
-                    val body = response.body ?: return@withContext Result.Failure("Empty response")
+                    val body = response.body ?: return@withContext FeedService.Result.Failure("Empty response")
                     val bytes = body.byteStream().readAtMost(MAX_BODY_BYTES)
-                    if (bytes.isEmpty()) return@withContext Result.Failure("Empty response")
+                    if (bytes.isEmpty()) return@withContext FeedService.Result.Failure("Empty response")
 
-                    Result.Success(
+                    FeedService.Result.Success(
                         feed = RssParser.parse(bytes),
                         etag = response.header("ETag"),
                         lastModified = response.header("Last-Modified"),
                     )
                 }
             } catch (e: IOException) {
-                Result.Failure(e.message ?: "Network error")
+                FeedService.Result.Failure(e.message ?: "Network error")
             } catch (e: IllegalArgumentException) {
-                Result.Failure("Invalid URL")
+                FeedService.Result.Failure("Invalid URL")
             } catch (e: Exception) {
                 // A malformed document should disable one source, not the refresh.
-                Result.Failure(e.message ?: e.javaClass.simpleName)
+                FeedService.Result.Failure(e.message ?: e.javaClass.simpleName)
             }
         }
 

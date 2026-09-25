@@ -56,7 +56,13 @@ Debug build z CI je podepsaný jiným klíčem než lokální. Při konfliktu po
 ## Zdroje kanálů
 
 `app/src/main/java/cz/balvin/news/data/local/DefaultFeeds.kt` se seeduje jen při
-prvním spuštění na prázdné tabulce. Adresy v něm nejsou ověřené — zdroj, který
+prvním spuštění na prázdné tabulce.
+
+Výběr médií není libovolný: jsou to všechna s hodnocením **A** od Nadačního
+fondu nezávislé žurnalistiky (nfnz.cz/rating-medii), jak si zadavatel vyžádal.
+Médium s A− a níž tam nepatří — než nějaké přidáš, zeptej se.
+
+Adresy kanálů součástí toho ratingu nejsou a ověřené nejsou; zdroj, který
 neodpovídá, se ukáže červeně v záložce *Zdroje*.
 
 ## Testy

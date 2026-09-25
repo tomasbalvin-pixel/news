@@ -2,66 +2,61 @@ package cz.balvin.news.data.local
 
 /**
  * Seeded once, on first launch, when the feed table is still empty.
- * Everything here is editable from the Sources screen — this is a starting
- * point, not a fixed list.
+ *
+ * The list is every outlet rated **A** by the Nadační fond nezávislé
+ * žurnalistiky (nfnz.cz/rating-medii), as the reader asked. Outlets rated A−
+ * and below are deliberately absent.
+ *
+ * The feed addresses are not part of that rating and are not verified — a
+ * source that does not answer shows its error in the Sources tab.
  */
 object DefaultFeeds {
 
-    const val CATEGORY_DOMESTIC = "Domácí"
-    const val CATEGORY_WORLD = "Svět"
-    const val CATEGORY_TECH = "Technologie"
+    const val CATEGORY_NEWS = "Zpravodajství"
     const val CATEGORY_ECONOMY = "Ekonomika"
 
     val ALL: List<Feed> = listOf(
         Feed(
-            title = "ČT24",
-            url = "https://ct24.ceskatelevize.cz/rss/hlavni-zpravy",
-            siteUrl = "https://ct24.ceskatelevize.cz",
-            category = CATEGORY_DOMESTIC,
-        ),
-        Feed(
-            title = "iROZHLAS",
-            url = "https://www.irozhlas.cz/rss/irozhlas",
-            siteUrl = "https://www.irozhlas.cz",
-            category = CATEGORY_DOMESTIC,
-        ),
-        Feed(
-            title = "Seznam Zprávy",
-            url = "https://www.seznamzpravy.cz/rss",
-            siteUrl = "https://www.seznamzpravy.cz",
-            category = CATEGORY_DOMESTIC,
-        ),
-        Feed(
             title = "Aktuálně.cz",
             url = "https://www.aktualne.cz/rss/",
             siteUrl = "https://www.aktualne.cz",
-            category = CATEGORY_DOMESTIC,
+            category = CATEGORY_NEWS,
         ),
         Feed(
-            title = "Novinky.cz",
-            url = "https://www.novinky.cz/rss",
-            siteUrl = "https://www.novinky.cz",
-            category = CATEGORY_DOMESTIC,
+            title = "České noviny",
+            url = "https://www.ceskenoviny.cz/sluzby/rss/zpravy.php",
+            siteUrl = "https://www.ceskenoviny.cz",
+            category = CATEGORY_NEWS,
         ),
         Feed(
-            title = "iDNES.cz — Zprávy",
-            url = "https://servis.idnes.cz/rss.aspx?c=zpravodaj",
-            siteUrl = "https://zpravy.idnes.cz",
-            category = CATEGORY_DOMESTIC,
+            title = "ČT24",
+            url = "https://ct24.ceskatelevize.cz/rss/hlavni-zpravy",
+            siteUrl = "https://ct24.ceskatelevize.cz",
+            category = CATEGORY_NEWS,
         ),
         Feed(
-            title = "BBC World",
-            url = "https://feeds.bbci.co.uk/news/world/rss.xml",
-            siteUrl = "https://www.bbc.com/news/world",
-            category = CATEGORY_WORLD,
+            title = "Deník",
+            url = "https://www.denik.cz/rss/vse.html",
+            siteUrl = "https://www.denik.cz",
+            category = CATEGORY_NEWS,
         ),
-        // Reuters withdrew its public RSS; the feed 404s. The Guardian's world
-        // feed has been stable for years and needs no key.
         Feed(
-            title = "The Guardian — World",
-            url = "https://www.theguardian.com/world/rss",
-            siteUrl = "https://www.theguardian.com/world",
-            category = CATEGORY_WORLD,
+            title = "Deník Alarm",
+            url = "https://a2larm.cz/feed/",
+            siteUrl = "https://a2larm.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Deník N",
+            url = "https://denikn.cz/feed/",
+            siteUrl = "https://denikn.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Deník Referendum",
+            url = "https://denikreferendum.cz/rss",
+            siteUrl = "https://denikreferendum.cz",
+            category = CATEGORY_NEWS,
         ),
         Feed(
             title = "E15",
@@ -70,22 +65,64 @@ object DefaultFeeds {
             category = CATEGORY_ECONOMY,
         ),
         Feed(
-            title = "Root.cz",
-            url = "https://www.root.cz/rss/clanky/",
-            siteUrl = "https://www.root.cz",
-            category = CATEGORY_TECH,
+            title = "Echo24",
+            url = "https://echo24.cz/rss",
+            siteUrl = "https://echo24.cz",
+            category = CATEGORY_NEWS,
         ),
         Feed(
-            title = "Lupa.cz",
-            url = "https://www.lupa.cz/rss/clanky/",
-            siteUrl = "https://www.lupa.cz",
-            category = CATEGORY_TECH,
+            title = "Euro",
+            url = "https://www.euro.cz/rss",
+            siteUrl = "https://www.euro.cz",
+            category = CATEGORY_ECONOMY,
         ),
         Feed(
-            title = "Ars Technica",
-            url = "https://feeds.arstechnica.com/arstechnica/index",
-            siteUrl = "https://arstechnica.com",
-            category = CATEGORY_TECH,
+            title = "Forum 24",
+            url = "https://www.forum24.cz/feed/",
+            siteUrl = "https://www.forum24.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Hospodářské noviny",
+            url = "https://hn.cz/?m=rss",
+            siteUrl = "https://hn.cz",
+            category = CATEGORY_ECONOMY,
+        ),
+        Feed(
+            title = "iROZHLAS",
+            url = "https://www.irozhlas.cz/rss/irozhlas",
+            siteUrl = "https://www.irozhlas.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Refresher",
+            url = "https://refresher.cz/rss",
+            siteUrl = "https://refresher.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Respekt",
+            url = "https://www.respekt.cz/rss",
+            siteUrl = "https://www.respekt.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Seznam Zprávy",
+            url = "https://www.seznamzpravy.cz/rss",
+            siteUrl = "https://www.seznamzpravy.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Voxpot",
+            url = "https://www.voxpot.cz/feed/",
+            siteUrl = "https://www.voxpot.cz",
+            category = CATEGORY_NEWS,
+        ),
+        Feed(
+            title = "Život v Česku",
+            url = "https://zivotvcesku.cz/feed/",
+            siteUrl = "https://zivotvcesku.cz",
+            category = CATEGORY_NEWS,
         ),
     )
 }

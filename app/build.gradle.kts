@@ -41,7 +41,15 @@ android {
     }
 
     packaging {
-        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // The Anthropic SDK brings Apache HttpComponents, whose three jars each
+            // carry a Maven-generated dependency list at the same path.
+            excludes += "/META-INF/DEPENDENCIES"
+            // Licence and notice texts also collide; keep one rather than drop the
+            // attribution Apache 2.0 asks for.
+            pickFirsts += "/META-INF/{LICENSE,LICENSE.txt,NOTICE,NOTICE.txt}"
+        }
     }
 
     testOptions {

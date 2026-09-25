@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cz.balvin.news.R
+import cz.balvin.news.data.ai.Digest
 import cz.balvin.news.data.local.ArticleListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +66,8 @@ fun TimelineScreen(
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val unreadCount by viewModel.unreadCount.collectAsStateWithLifecycle()
     val editionOnly by viewModel.editionOnly.collectAsStateWithLifecycle()
+    val digest by viewModel.digest.collectAsStateWithLifecycle()
+    val isSummarising by viewModel.isSummarising.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
 
@@ -74,6 +77,8 @@ fun TimelineScreen(
     val listState = rememberLazyListState()
 
     val messageText = when (val current = message) {
+        TimelineMessage.NoApiKey -> stringResource(R.string.digest_no_key)
+        is TimelineMessage.DigestFailed -> stringResource(R.string.digest_failed, current.reason)
         is TimelineMessage.PartialFailure ->
             stringResource(R.string.refresh_partial, current.feedCount, current.reason)
         TimelineMessage.MarkedAllRead -> stringResource(R.string.marked_all_read)
@@ -171,6 +176,8 @@ fun TimelineScreen(
                 } else {
                     ArticleList(
                         articles = articles,
+                        digest = digest.takeIf { editionOnly },
+                        isSummarising = isSummarising && editionOnly,
                         state = listState,
                         onOpen = { item ->
                             viewModel.setRead(item.article.id, true)
@@ -187,11 +194,18 @@ fun TimelineScreen(
 @Composable
 private fun ArticleList(
     articles: List<ArticleListItem>,
+    digest: Digest?,
+    isSummarising: Boolean,
     state: LazyListState,
     onOpen: (ArticleListItem) -> Unit,
     onToggleBookmark: (ArticleListItem) -> Unit,
 ) {
     LazyColumn(state = state, modifier = Modifier.fillMaxSize()) {
+        if (digest != null || isSummarising) {
+            item(key = "digest") {
+                DigestCard(digest = digest, isSummarising = isSummarising)
+            }
+        }
         items(articles, key = { it.article.id }) { item ->
             ArticleCard(
                 item = item,

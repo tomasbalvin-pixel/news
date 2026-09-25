@@ -4,7 +4,12 @@ import android.util.Log
 import cz.balvin.news.data.local.Article
 import cz.balvin.news.data.local.ArticleDao
 import cz.balvin.news.data.local.ArticleListItem
+import cz.balvin.news.data.ai.Digest
+import cz.balvin.news.data.ai.DigestService
+import cz.balvin.news.data.ai.DigestTopic
 import cz.balvin.news.data.local.DefaultFeeds
+import cz.balvin.news.data.local.DigestDao
+import cz.balvin.news.data.local.DigestTopicEntity
 import cz.balvin.news.data.local.Feed
 import cz.balvin.news.data.local.FeedDao
 import cz.balvin.news.data.remote.FeedService
@@ -13,6 +18,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.util.concurrent.TimeUnit
@@ -20,7 +27,9 @@ import java.util.concurrent.TimeUnit
 class NewsRepository(
     private val feedDao: FeedDao,
     private val articleDao: ArticleDao,
+    private val digestDao: DigestDao,
     private val feedService: FeedService,
+    private val digestService: DigestService,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
 
@@ -46,6 +55,19 @@ class NewsRepository(
     fun observeUnreadCount(): Flow<Int> = articleDao.observeUnreadCount()
 
     fun observeArticle(id: Long): Flow<ArticleListItem?> = articleDao.observeById(id)
+
+    /** The digest of one edition, or null while it has none. */
+    fun observeDigest(editionAt: Long): Flow<Digest?> =
+        digestDao.observeForEdition(editionAt).map { rows ->
+            if (rows.isEmpty()) {
+                null
+            } else {
+                Digest(
+                    topics = rows.map { DigestTopic(it.title, it.summary, it.sources) },
+                    generatedAt = rows.first().generatedAt,
+                )
+            }
+        }
 
     fun observeTimeline(filter: TimelineFilter): Flow<List<ArticleListItem>> =
         articleDao.observeTimeline(
@@ -113,7 +135,48 @@ class NewsRepository(
     /** Drops read, unsaved articles past the retention window. */
     suspend fun prune(retentionDays: Int): Int {
         val cutoff = now() - TimeUnit.DAYS.toMillis(retentionDays.toLong())
+        digestDao.deleteOlderThan(cutoff)
         return articleDao.deleteOlderThan(cutoff)
+    }
+
+    // ---- Digest ------------------------------------------------------------
+
+    /**
+     * Summarises one edition and stores the result. The articles stay untouched
+     * whatever the model does, so a failure costs the digest and nothing else.
+     */
+    suspend fun refreshDigest(
+        editionAt: Long,
+        apiKey: String,
+        perSourceLimit: Int,
+        editionSize: Int,
+    ): DigestService.Result {
+        val articles = observeTimeline(
+            TimelineFilter(
+                since = editionAt,
+                perSourceLimit = perSourceLimit,
+                limit = editionSize,
+            )
+        ).first()
+
+        val result = digestService.summarise(articles, apiKey)
+        if (result is DigestService.Result.Success) {
+            val timestamp = now()
+            digestDao.replaceForEdition(
+                editionAt = editionAt,
+                topics = result.digest.topics.mapIndexed { index, topic ->
+                    DigestTopicEntity(
+                        editionAt = editionAt,
+                        position = index,
+                        title = topic.title,
+                        summary = topic.summary,
+                        sources = topic.sources,
+                        generatedAt = timestamp,
+                    )
+                },
+            )
+        }
+        return result
     }
 
     // ---- Refresh -----------------------------------------------------------

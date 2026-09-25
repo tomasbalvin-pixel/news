@@ -48,6 +48,13 @@
     <string name="settings_at_hour">%1$d:00</string>
     <string name="settings_articles">%1$d articles</string>
     <string name="settings_notifications">Notify when an edition is ready</string>
+    <string name="settings_digest">Digest</string>
+    <string name="settings_api_key">Anthropic API key</string>
+    <string name="settings_api_key_hint">Stays on this device and is left out of backups. Without it the edition is a plain list.</string>
+    <string name="digest_title">Digest</string>
+    <string name="digest_working">Reading the edition…</string>
+    <string name="digest_no_key">No API key — add one in Settings to get a digest.</string>
+    <string name="digest_failed">Digest failed: %1$s</string>
     <string name="settings_volume">Volume</string>
     <string name="settings_per_source">Articles per source</string>
     <string name="per_source_count">%1$d newest</string>

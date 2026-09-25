@@ -46,6 +46,10 @@ class SettingsViewModel(
         viewModelScope.launch { settingsStore.setNotificationsEnabled(enabled) }
     }
 
+    fun setApiKey(key: String) {
+        viewModelScope.launch { settingsStore.setApiKey(key) }
+    }
+
     fun setPerSourceLimit(limit: Int) {
         viewModelScope.launch { settingsStore.setPerSourceLimit(limit) }
     }

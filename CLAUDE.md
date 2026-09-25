@@ -18,6 +18,19 @@ projít všechno — nic se nemaže, jen se necpe dopředu.
 Než přidáš cokoli, co zvyšuje objem nebo četnost upozornění, zvaž, že jde proti
 zadání.
 
+## Výtah
+
+Jádro aplikace není seznam, ale **výtah**: vydání se pošle Claudovi
+(`claude-opus-5`, strukturovaný výstup) a vrátí se pár témat, o která ve
+skutečnosti jde. Články pod ním jsou podklad, ne produkt.
+
+Klíč zadává uživatel v nastavení, leží v DataStore a je vyloučený ze zálohy
+(`data_extraction_rules.xml`). Do APK se klíč nikdy nezašívá — z balíčku ho
+kdokoli vytáhne.
+
+Selhání výtahu nesmí shodit vydání: články jsou na obrazovce tak jako tak.
+`refreshDigest` proto chybu vrací, nevyhazuje, a starý výtah nechá být.
+
 ## Instalace na zařízení
 
 **Buildy neposílej přes GitHub Release ani přes artefakty Actions.** Instaluj

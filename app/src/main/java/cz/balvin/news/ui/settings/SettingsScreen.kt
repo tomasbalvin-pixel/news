@@ -13,6 +13,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -27,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -79,6 +82,13 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_notifications),
                 checked = settings.notificationsEnabled,
                 onCheckedChange = viewModel::setNotificationsEnabled,
+            )
+
+            HorizontalDivider()
+            SectionHeader(stringResource(R.string.settings_digest))
+            ApiKeyRow(
+                key = settings.apiKey,
+                onKeyChange = viewModel::setApiKey,
             )
 
             HorizontalDivider()
@@ -175,6 +185,35 @@ private fun <T> ChoiceRow(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ApiKeyRow(key: String, onKeyChange: (String) -> Unit) {
+    var draft by remember(key) { mutableStateOf(key) }
+
+    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+        OutlinedTextField(
+            value = draft,
+            onValueChange = {
+                draft = it
+                onKeyChange(it)
+            },
+            label = { Text(stringResource(R.string.settings_api_key)) },
+            singleLine = true,
+            visualTransformation = if (draft.isBlank()) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = stringResource(R.string.settings_api_key_hint),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp),
+        )
     }
 }
 

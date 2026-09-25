@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.coil.compose)
     implementation(libs.okhttp)
+    implementation(libs.anthropic.java)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

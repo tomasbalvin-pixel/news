@@ -3,7 +3,11 @@ package cz.balvin.news.data.repository
 import android.app.Application
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import cz.balvin.news.data.ai.Digest
+import cz.balvin.news.data.ai.DigestService
+import cz.balvin.news.data.ai.DigestTopic
 import cz.balvin.news.data.local.AppDatabase
+import cz.balvin.news.data.local.ArticleListItem
 import cz.balvin.news.data.local.Feed
 import cz.balvin.news.data.local.FeedDao
 import cz.balvin.news.data.remote.FeedService
@@ -28,6 +32,7 @@ class NewsRepositoryTest {
     private lateinit var database: AppDatabase
     private lateinit var feedDao: FeedDao
     private lateinit var service: FakeFeedService
+    private lateinit var digestService: FakeDigestService
     private lateinit var repository: NewsRepository
 
     private var clock = 1_000L
@@ -41,10 +46,13 @@ class NewsRepositoryTest {
 
         feedDao = database.feedDao()
         service = FakeFeedService()
+        digestService = FakeDigestService()
         repository = NewsRepository(
             feedDao = feedDao,
             articleDao = database.articleDao(),
+            digestDao = database.digestDao(),
             feedService = service,
+            digestService = digestService,
             now = { clock },
         )
     }
@@ -221,6 +229,76 @@ class NewsRepositoryTest {
         assertEquals(afterFirst - 1, feedDao.observeAll().first().size)
     }
 
+    @Test
+    fun `a digest is stored against the edition it summarises`() = runTest {
+        feedDao.insert(feed())
+        service.stub(FEED_URL, success(item("a"), item("b")))
+        clock = 5_000
+        repository.refreshAll()
+        digestService.stub(
+            Digest(
+                topics = listOf(DigestTopic("Rozpočet", "Vláda ho schválila.", listOf("Deník"))),
+                generatedAt = 0,
+            )
+        )
+
+        val result = repository.refreshDigest(
+            editionAt = 1_000, apiKey = "k", perSourceLimit = 0, editionSize = 0,
+        )
+
+        assertTrue(result is DigestService.Result.Success)
+        val stored = repository.observeDigest(1_000).first()
+        assertEquals(listOf("Rozpočet"), stored?.topics?.map { it.title })
+        assertEquals(listOf("Deník"), stored?.topics?.single()?.sources)
+    }
+
+    @Test
+    fun `regenerating replaces the previous digest instead of stacking`() = runTest {
+        feedDao.insert(feed())
+        service.stub(FEED_URL, success(item("a")))
+        repository.refreshAll()
+
+        digestService.stub(Digest(listOf(DigestTopic("První", "x", emptyList())), 0))
+        repository.refreshDigest(1_000, "k", 0, 0)
+        digestService.stub(Digest(listOf(DigestTopic("Druhé", "y", emptyList())), 0))
+        repository.refreshDigest(1_000, "k", 0, 0)
+
+        assertEquals(
+            listOf("Druhé"),
+            repository.observeDigest(1_000).first()?.topics?.map { it.title },
+        )
+    }
+
+    @Test
+    fun `a failed digest leaves the previous one in place`() = runTest {
+        feedDao.insert(feed())
+        service.stub(FEED_URL, success(item("a")))
+        repository.refreshAll()
+        digestService.stub(Digest(listOf(DigestTopic("Původní", "x", emptyList())), 0))
+        repository.refreshDigest(1_000, "k", 0, 0)
+
+        digestService.fail("HTTP 401")
+        val result = repository.refreshDigest(1_000, "k", 0, 0)
+
+        assertTrue(result is DigestService.Result.Failure)
+        assertEquals(
+            listOf("Původní"),
+            repository.observeDigest(1_000).first()?.topics?.map { it.title },
+        )
+    }
+
+    @Test
+    fun `without a key nothing is summarised and nothing is stored`() = runTest {
+        feedDao.insert(feed())
+        service.stub(FEED_URL, success(item("a")))
+        repository.refreshAll()
+
+        val result = repository.refreshDigest(1_000, apiKey = "", perSourceLimit = 0, editionSize = 0)
+
+        assertEquals(DigestService.Result.NoApiKey, result)
+        assertNull(repository.observeDigest(1_000).first())
+    }
+
     private suspend fun timeline() = repository.observeTimeline(TimelineFilter()).first()
 
     private fun feed(
@@ -251,6 +329,25 @@ class NewsRepositoryTest {
         etag = etag,
         lastModified = lastModified,
     )
+
+    private class FakeDigestService : DigestService {
+
+        private var result: DigestService.Result = DigestService.Result.Failure("no stub")
+
+        fun stub(digest: Digest) {
+            result = DigestService.Result.Success(digest)
+        }
+
+        fun fail(message: String) {
+            result = DigestService.Result.Failure(message)
+        }
+
+        override suspend fun summarise(
+            articles: List<ArticleListItem>,
+            apiKey: String,
+        ): DigestService.Result =
+            if (apiKey.isBlank()) DigestService.Result.NoApiKey else result
+    }
 
     private class FakeFeedService : FeedService {
 

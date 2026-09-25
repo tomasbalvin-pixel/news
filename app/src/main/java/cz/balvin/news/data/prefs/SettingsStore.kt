@@ -26,6 +26,8 @@ data class Settings(
     val retentionDays: Int = 30,
     /** When the current edition was assembled; articles fetched since belong to it. */
     val currentEditionAt: Long = 0,
+    /** Anthropic API key, typed by the user; empty means no digest. */
+    val apiKey: String = "",
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -43,6 +45,7 @@ class SettingsStore(private val context: Context) {
             notificationsEnabled = prefs[KEY_NOTIFICATIONS] ?: true,
             retentionDays = prefs[KEY_RETENTION] ?: 30,
             currentEditionAt = prefs[KEY_EDITION_AT] ?: 0,
+            apiKey = prefs[KEY_API_KEY].orEmpty(),
         )
     }
 
@@ -56,6 +59,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setEditionSize(size: Int) {
         context.dataStore.edit { it[KEY_EDITION_SIZE] = size.coerceAtLeast(0) }
+    }
+
+    suspend fun setApiKey(key: String) {
+        context.dataStore.edit { it[KEY_API_KEY] = key.trim() }
     }
 
     /** Opens a new edition: everything fetched from now on belongs to it. */
@@ -90,5 +97,6 @@ class SettingsStore(private val context: Context) {
         private val KEY_NOTIFICATIONS = booleanPreferencesKey("notifications_enabled")
         private val KEY_RETENTION = intPreferencesKey("retention_days")
         private val KEY_PER_SOURCE = intPreferencesKey("per_source_limit")
+        private val KEY_API_KEY = stringPreferencesKey("api_key")
     }
 }

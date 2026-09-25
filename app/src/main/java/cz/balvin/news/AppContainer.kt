@@ -3,6 +3,7 @@ package cz.balvin.news
 import android.content.Context
 import cz.balvin.news.data.local.AppDatabase
 import cz.balvin.news.data.prefs.SettingsStore
+import cz.balvin.news.data.ai.AnthropicDigestService
 import cz.balvin.news.data.remote.HttpFeedService
 import cz.balvin.news.data.repository.NewsRepository
 
@@ -20,7 +21,9 @@ class AppContainer(context: Context) {
         NewsRepository(
             feedDao = database.feedDao(),
             articleDao = database.articleDao(),
+            digestDao = database.digestDao(),
             feedService = HttpFeedService(),
+            digestService = AnthropicDigestService(),
         )
     }
 }

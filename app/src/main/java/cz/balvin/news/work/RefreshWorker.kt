@@ -30,6 +30,17 @@ class RefreshWorker(
 
         runCatching { container.repository.prune(settings.retentionDays) }
 
+        // The digest is what the edition is for; a failure here still leaves the
+        // articles in place.
+        runCatching {
+            container.repository.refreshDigest(
+                editionAt = startedAt,
+                apiKey = settings.apiKey,
+                perSourceLimit = settings.perSourceLimit,
+                editionSize = settings.editionSize,
+            )
+        }
+
         if (outcome.newArticles > 0 && settings.notificationsEnabled) {
             val edition = container.repository
                 .observeTimeline(

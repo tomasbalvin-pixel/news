@@ -45,6 +45,13 @@
     <string name="settings_at_hour">%1$d:00</string>
     <string name="settings_articles">%1$d článků</string>
     <string name="settings_notifications">Upozornit, až bude vydání hotové</string>
+    <string name="settings_digest">Výtah</string>
+    <string name="settings_api_key">API klíč Anthropic</string>
+    <string name="settings_api_key_hint">Zůstane v telefonu a nejde do zálohy. Bez něj je vydání jen seznam.</string>
+    <string name="digest_title">Výtah</string>
+    <string name="digest_working">Čtu vydání…</string>
+    <string name="digest_no_key">Chybí API klíč — doplň ho v nastavení a výtah se udělá.</string>
+    <string name="digest_failed">Výtah selhal: %1$s</string>
     <string name="settings_volume">Objem</string>
     <string name="settings_per_source">Článků na zdroj</string>
     <string name="per_source_count">%1$d nejnovějších</string>
